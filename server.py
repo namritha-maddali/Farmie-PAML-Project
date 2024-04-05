@@ -17,7 +17,10 @@ from PIL import Image
 import os
 
 
-@app.route("/leaf", methods=["POST"])
+app = Flask(__name__)
+CORS(app,origins = ["https://localhost:3000"])
+
+@app.route("/disease_detection", methods=["POST"])
 @cross_origin()
 def members1():
     print("hello from leaf")
