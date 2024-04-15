@@ -42,27 +42,22 @@ def prediction(image_path):
 def members4():
     print("hello from leaf")
     try:
-        # Get the file from the form data
         file = request.files.get('file')
         
         if not file:
             return jsonify({'error': 'No file part'})
         
-        # Check if the file has a valid filename
         if file.filename == '':
             return jsonify({'error': 'No selected file'})
         
-        # Check if the file has a valid extension
+        # allows only jpg format pictures
         allowed_extensions = {'jpg'}
         if '.' not in file.filename or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
             return jsonify({'error': 'Only JPG files are allowed'})
         
-        # Save the file
         file.save('research/leaf.jpg')
         print("File saved in research folder")
 
-               
-        # Load and preprocess the image
         new_img = Image.open('leaf_images/preprocessed_image.jpg').convert('RGB').resize((224, 224))
         img = TF.ToTensor()(new_img)
         img = img.unsqueeze(0)
@@ -72,8 +67,9 @@ def members4():
         # img_numpy = img.squeeze(0).permute(1, 2, 0).numpy()
         # img = Image.fromarray((img_numpy * 255).astype('uint8'))
 
-        # Load the model and make a prediction
+        # created model
         model = CNN.CNN(39)
+        # imported model
         model.load_state_dict(torch.load('models/plant_disease_model_1_latest.pt', map_location=torch.device('cpu')))
         prediction = model(img).detach().numpy()
 
@@ -120,8 +116,8 @@ def members4():
             'Tomato___Tomato_mosaic_virus',
             'Tomato___healthy'
         ]
-
-        # Get the predicted label
+        
+        # just map haha
         predicted_label = class_labels[predicted_class_idx]
 
         print(f"Predicted Label: {predicted_label}")
