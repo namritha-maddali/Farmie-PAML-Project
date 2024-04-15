@@ -20,39 +20,65 @@ import os
 app = Flask(__name__)
 CORS(app,origins = ["https://localhost:3000"])
 
-@app.route("/disease_detection", methods=["POST"])
+disease_info = pd.read_csv('disease_info.csv' , encoding='cp1252')
+supplement_info = pd.read_csv('supplement_info.csv',encoding='cp1252')
+
+model = CNN.CNN(39)    
+model.load_state_dict(torch.load("models/plant_disease_model_1_latest.pt"))
+model.eval()
+
+def prediction(image_path):
+    image = Image.open(image_path)
+    image = image.resize((224, 224))
+    input_data = TF.to_tensor(image)
+    input_data = input_data.view((-1, 3, 224, 224))
+    output = model(input_data)
+    output = output.detach().numpy()
+    index = np.argmax(output)
+    return index
+
+@app.route("/diseased_detection", methods=["POST"])
 @cross_origin()
-def members1():
+def members4():
     print("hello from leaf")
     try:
+        # Get the file from the form data
         file = request.files.get('file')
         
         if not file:
             return jsonify({'error': 'No file part'})
         
+        # Check if the file has a valid filename
         if file.filename == '':
             return jsonify({'error': 'No selected file'})
         
-        
+        # Check if the file has a valid extension
         allowed_extensions = {'jpg'}
         if '.' not in file.filename or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
             return jsonify({'error': 'Only JPG files are allowed'})
         
-        os.makedirs("images", exist_ok=True)
-        file.save('images/leaf.jpg')
-        print("File saved")
-        
-        new_img = Image.open('images/leaf.jpg').convert('RGB').resize((224, 224))
+        # Save the file
+        file.save('research/leaf.jpg')
+        print("File saved in research folder")
+
+               
+        # Load and preprocess the image
+        new_img = Image.open('leaf_images/preprocessed_image.jpg').convert('RGB').resize((224, 224))
         img = TF.ToTensor()(new_img)
         img = img.unsqueeze(0)
         img = img / 255.0
-        
+
+        # Save the preprocessed image
+        # img_numpy = img.squeeze(0).permute(1, 2, 0).numpy()
+        # img = Image.fromarray((img_numpy * 255).astype('uint8'))
+
         # Load the model and make a prediction
         model = CNN.CNN(39)
-        model.load_state_dict(torch.load('plant_disease_model_1_latest.pt', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('models/plant_disease_model_1_latest.pt', map_location=torch.device('cpu')))
         prediction = model(img).detach().numpy()
+
         predicted_class_idx = np.argmax(prediction[0])
-        
+
         class_labels = [
             'Apple___Apple_scab',
             'Apple___Black_rot',
@@ -95,9 +121,11 @@ def members1():
             'Tomato___healthy'
         ]
 
+        # Get the predicted label
         predicted_label = class_labels[predicted_class_idx]
 
-        
+        print(f"Predicted Label: {predicted_label}")
+
         return jsonify({"leaf status": predicted_label})
     
     except Exception as e:
