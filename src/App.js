@@ -1,21 +1,21 @@
-import React from 'react';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes} from "react-router-dom";
 
-import './App.css';
-import NavBar from './components/NavBar';
-import Detect from './components/pages/Detect';
+import Home from "./components/Home";
+import NavBar from "./components/NavBar";
+
+import Detect from "./components/pages/Detect";
 import Yield from './components/pages/Yield';
 
 function App() {
   return (
-    <div className='total'>
-      <div className="bg"></div>
-      <NavBar />
-      <div className='but-cont'>
-        <button className='butt' onClick={() => window.location.href='/yield_estimate'} > Crop-Yield Estimator </button>
-        <button className='butt' onClick={() => window.location.href='/disease_detect'} > Plant Disease Detection </button>
-        <button className='butt' id='ask' onClick={() => window.location.href='http://localhost:8501/'}> ask me anything agriculture </button>
-      </div>
-    </div>
+    <Router>
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path="/yield_estimate" element={<Yield/>} />
+        <Route path='/disease_detect' element={<Detect />} />
+      </Routes>
+    </Router>
   );
 }
 
