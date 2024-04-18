@@ -1,7 +1,7 @@
 import streamlit as st
 import webbrowser
+import plotly.graph_objects as go
 
-import webbrowser
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -105,7 +105,7 @@ y_pred1 = rfr.predict(X_test)
 st.set_page_config(page_title="Yield Estimation", page_icon="leaf.png")
 st.title('Your Crop Yield Estimation')
 
-st.title('Drop in Your Input')
+st.caption('Drop in Your Input')
 state = st.text_input("Enter your state")
 district = st.text_input("Enter your district")
 crop = st.text_input("Enter the name of the crop")
@@ -144,6 +144,32 @@ if st.button("Predict"):
 
     st.write(f"Your estimated yield is ***{rounded_yield:.3f}*** tonnes per hectare")
     st.write(f"If the odds are on your side, your production would be ***{rounded_production:.3f}*** tonnes!")
+
+    def preprocess_data(df, thresh=0.3):
+        graph_df = df.copy()
+        scaler = StandardScaler()  # Use StandardScaler for z-score
+        df_zscore = pd.DataFrame(scaler.fit_transform(graph_df))
+        outliers = df_zscore.abs() > thresh
+        graph_df = graph_df[~outliers.any(axis=1)]
+        graph_df = graph_df.reset_index(drop=True)
+        return graph_df
+
+    def generate_scatter_plot(graph_df, y, predicted_production, predicted_yield):
+        y_new = y.sample(n=len(graph_df))
+        y_new = y_new.reset_index(drop=True)
+        y_new = np.sort(y_new)
+
+        fig = go.Figure()  # Create an empty figure
+
+        fig.add_trace(go.Scatter(x=graph_df['Production'], y=y_new, mode='markers', marker=dict(color='#63b077', opacity=0.5)))
+        fig.add_trace(go.Scatter(x=predicted_production, y=predicted_yield, mode='markers', marker_color="black", text="This is You!"))
+
+        return fig
+
+    st.header(f"Where you stand !")
+    graph_df = preprocess_data(tar_enc_df)  # Assuming tar_enc_df contains your data
+    fig = generate_scatter_plot(graph_df, y, predicted_production, predicted_yield)
+    st.plotly_chart(fig)
 
 if st.button("Back to Home"):
     webbrowser.open_new("http://localhost:3000")
