@@ -4,8 +4,6 @@ import plotly.graph_objects as go
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 from sklearn.preprocessing import TargetEncoder
 from sklearn.preprocessing import StandardScaler
@@ -55,9 +53,9 @@ tar_enc_df = pd.concat([tar_enc_df, X[numeric_columns]], axis=1)
 tar_enc_df = pd.concat([tar_enc_df, y], axis=1)
 
 # production can determined from area and yield so this can be dropped
-# production is being dropped as this is the way yield is calculated
-# yield = production/area
-# so if the model can predict yield from area then production can be estimated through simple math as well
+    # production is being dropped as this is the way yield is calculated
+    # yield = production/area
+    # so if the model can predict yield from area then production can be estimated through simple math as well
 
 tar_enc_df_prod = tar_enc_df.drop(['Production'], axis=1)
 
@@ -100,7 +98,6 @@ rfr.fit(X_train,y_train)
 
 y_pred1 = rfr.predict(X_test)
 
-
 # gui
 st.set_page_config(page_title="Yield Estimation", page_icon="leaf.png")
 st.title('Your Crop Yield Estimation')
@@ -114,7 +111,7 @@ area = st.number_input("Enter the area of land (in hectares)", min_value=0.0)
 units = st.radio("Select area units", ["Hectares", "Acres"])
 
 if units == "Acres":
-    area *= 0.4  # Convert acres to hectares
+    area *= 0.4
 
 if st.button("Predict"):
     user_input = pd.DataFrame({
@@ -142,15 +139,17 @@ if st.button("Predict"):
     rounded_yield = round(predicted_yield[0], 3)
     rounded_production = round(predicted_production[0], 3)
 
-    st.write(f"Your estimated yield is ***{rounded_yield:.3f}*** tonnes per hectare")
-    st.write(f"If the odds are on your side, your production would be ***{rounded_production:.3f}*** tonnes!")
+    st.write(f'''Your estimated yield is **{rounded_yield:.3f}** tonnes per hectare''')
+    st.write(f'''If the odds are on your side, your production would be **{rounded_production:.3f}** tonnes!''')
 
-    def preprocess_data(df, thresh=0.3):
+    def preprocess_data(df, thresh=1, min_production=100):
         graph_df = df.copy()
         scaler = StandardScaler()  # Use StandardScaler for z-score
         df_zscore = pd.DataFrame(scaler.fit_transform(graph_df))
         outliers = df_zscore.abs() > thresh
+        lesser = graph_df['Production'] < min_production
         graph_df = graph_df[~outliers.any(axis=1)]
+        graph_df = graph_df[lesser]
         graph_df = graph_df.reset_index(drop=True)
         return graph_df
 
@@ -159,15 +158,15 @@ if st.button("Predict"):
         y_new = y_new.reset_index(drop=True)
         y_new = np.sort(y_new)
 
-        fig = go.Figure()  # Create an empty figure
+        fig = go.Figure()
 
-        fig.add_trace(go.Scatter(x=graph_df['Production'], y=y_new, mode='markers', marker=dict(color='#63b077', opacity=0.5)))
-        fig.add_trace(go.Scatter(x=predicted_production, y=predicted_yield, mode='markers', marker_color="black", text="This is You!"))
+        fig.add_trace(go.Scatter(x=y_new, y=graph_df['Production'], mode='markers', marker=dict(color='#3b7d4c', opacity=0.7)))
+        fig.add_trace(go.Scatter(x=predicted_yield, y=predicted_production, mode='markers', marker_color="black", text="This is You!"))
 
         return fig
 
-    st.header(f"Where you stand !")
-    graph_df = preprocess_data(tar_enc_df)  # Assuming tar_enc_df contains your data
+    st.header("""**Where you are**""")
+    graph_df = preprocess_data(tar_enc_df)
     fig = generate_scatter_plot(graph_df, y, predicted_production, predicted_yield)
     st.plotly_chart(fig)
 
