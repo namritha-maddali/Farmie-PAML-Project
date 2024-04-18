@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap');
+
 .nav {
     display: flex;
     flex-direction: row;
@@ -11,12 +13,12 @@
 
 .link{
     border: none;
-    font-family: 'Century Gothic', sans-serif;
+    font-family: 'League Spartan', sans-serif;
     background-color: transparent;
-    color: rgb(109, 163, 109);
-    padding-right: 60px;
+    color: rgb(125, 211, 125);
+    padding-right: 70px;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 20px;
     transition: transform 0.3s ease-in-out;
 }
 

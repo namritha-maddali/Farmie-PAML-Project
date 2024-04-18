@@ -16,7 +16,7 @@
 
 .but-cont {
   position: absolute;
-  top: 60%;
+  top: 55%;
   left: 58%;
   transform: translate(-50%, -50%);
   text-align: center;
@@ -25,10 +25,11 @@
 .butt {
   font-family: 'League Spartan', sans-serif;
   border-radius: 10px;
-  background-color: rgb(14, 53, 14);
+  background-color: rgb(125, 211, 125);
   padding: 20px 50px;
-  margin: 30px;
-  color: white;
+  padding-top: 25px;
+  margin: 20px;
+  color: rgb(14, 53, 14);
   font-weight: bold;
   font-size: 23px;
   border: none;
@@ -39,19 +40,4 @@
 .butt:hover {
   cursor: pointer;
   background-color: rgb(89, 147, 89);
-}
-
-#ask{
-  margin-top:40px;
-  display: inline-block;
-  background-color: white;
-  color: rgb(14, 53, 14);
-  padding: 10px 170px;
-  padding-top: 12px;
-  font-size: 14px;
-  font-weight: 400;
-}
-#ask:hover{
-  transform: scale(1);
-  cursor: text;
 }
